@@ -1,0 +1,38 @@
+/* Theme tokens: Light = warm Italy hues; Dark = neon green/red accents */
+:root {
+  --radius: 18px;
+  --shadow: 0 18px 50px rgba(0,0,0,0.22);
+
+  --ease: cubic-bezier(.2,.8,.2,1);
+
+  /* Light default */
+  --bg: #fbf5ea;
+  --bg2: #fff;
+  --card: rgba(255,255,255,0.72);
+  --card2: rgba(255,255,255,0.9);
+  --text: #1a1a1a;
+  --muted: rgba(26,26,26,0.64);
+  --line: rgba(26,26,26,0.12);
+
+  --accent: #0f7a3b;   /* Italy green */
+  --accent2: #b31414;  /* Italy red */
+  --gold: #b8872d;
+
+  --glow: 0 0 0 rgba(0,0,0,0);
+}
+
+:root[data-theme="dark"] {
+  --bg: #070a12;
+  --bg2: #0b1220;
+  --card: rgba(14, 20, 36, 0.72);
+  --card2: rgba(14, 20, 36, 0.92);
+  --text: #eaf0ff;
+  --muted: rgba(234, 240, 255, 0.68);
+  --line: rgba(234, 240, 255, 0.12);
+
+  --accent: #39ff7a;   /* neon green */
+  --accent2: #ff2b6d;  /* neon red/pink */
+  --gold: #ffd36b;
+
+  --glow: 0 0 22px rgba(57,255,122,0.14);
+}
