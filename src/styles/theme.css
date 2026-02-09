@@ -1,4 +1,4 @@
-/* Theme tokens: Light = warm Italy hues; Dark = neon green/red accents */
+/* Theme tokens: both themes center on Italian flag-inspired hues */
 :root {
   --radius: 18px;
   --shadow: 0 18px 50px rgba(0,0,0,0.22);
@@ -14,25 +14,29 @@
   --muted: rgba(26,26,26,0.64);
   --line: rgba(26,26,26,0.12);
 
-  --accent: #0f7a3b;   /* Italy green */
-  --accent2: #b31414;  /* Italy red */
-  --gold: #b8872d;
+  --flag-green: #009246;
+  --flag-white: #f7f7f2;
+  --flag-red: #ce2b37;
+
+  --accent: var(--flag-green);
+  --accent2: var(--flag-red);
+  --gold: #c89c3d;
 
   --glow: 0 0 0 rgba(0,0,0,0);
 }
 
 :root[data-theme="dark"] {
-  --bg: #070a12;
-  --bg2: #0b1220;
-  --card: rgba(14, 20, 36, 0.72);
-  --card2: rgba(14, 20, 36, 0.92);
-  --text: #eaf0ff;
-  --muted: rgba(234, 240, 255, 0.68);
-  --line: rgba(234, 240, 255, 0.12);
+  --bg: #08150f;
+  --bg2: #0f2018;
+  --card: rgba(16, 31, 24, 0.74);
+  --card2: rgba(16, 31, 24, 0.92);
+  --text: #f3f6ef;
+  --muted: rgba(243, 246, 239, 0.7);
+  --line: rgba(243, 246, 239, 0.14);
 
-  --accent: #39ff7a;   /* neon green */
-  --accent2: #ff2b6d;  /* neon red/pink */
-  --gold: #ffd36b;
+  --accent: #33b36d;
+  --accent2: #ef4a58;
+  --gold: #e3bf6a;
 
-  --glow: 0 0 22px rgba(57,255,122,0.14);
+  --glow: 0 0 22px rgba(51, 179, 109, 0.18);
 }

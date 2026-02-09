@@ -1,7 +1,12 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import Card from "../components/Card.jsx";
-import { fbEnabled, ensureAnonAuth, getFirebase, serverTimestamp } from "../firebase.js";
+import {
+  fbEnabled,
+  ensureAnonAuth,
+  getFirebase,
+  serverTimestamp,
+} from "../firebase.js";
 import { LOCATIONS } from "../data/locations.js";
 import {
   collection,
@@ -11,7 +16,7 @@ import {
   limit,
   orderBy,
   query,
-  setDoc
+  setDoc,
 } from "firebase/firestore";
 
 export async function submitAchievementIfEligible(state, setState) {
@@ -45,7 +50,7 @@ export async function submitAchievementIfEligible(state, setState) {
     totalPoints: Number(state.totalPoints || 0),
     completedAt: serverTimestamp(),
     solvedCount,
-    version: "v1"
+    version: "v1",
   };
 
   await setDoc(entryRef, payload, { merge: false });
@@ -60,7 +65,9 @@ export default function Leaderboard({ state, onToast }) {
 
   const solvedCount = Object.keys(state.solved || {}).length;
   const allDone = solvedCount === LOCATIONS.length;
-  const profileOk = (state.profile?.firstName || "").trim() && (state.profile?.department || "").trim();
+  const profileOk =
+    (state.profile?.firstName || "").trim() &&
+    (state.profile?.department || "").trim();
 
   useEffect(() => {
     let mounted = true;
@@ -76,7 +83,7 @@ export default function Leaderboard({ state, onToast }) {
         const qy = query(
           collection(db, "italyQuestLeaderboard"),
           orderBy("totalPoints", "desc"),
-          limit(50)
+          limit(50),
         );
         const snap = await getDocs(qy);
         const list = [];
@@ -89,7 +96,9 @@ export default function Leaderboard({ state, onToast }) {
       }
     }
     load();
-    return () => { mounted = false; };
+    return () => {
+      mounted = false;
+    };
   }, []);
 
   const top3 = useMemo(() => rows.slice(0, 3), [rows]);
@@ -98,24 +107,25 @@ export default function Leaderboard({ state, onToast }) {
     <div className="stack">
       <section className="page-head">
         <div className="crumbs">
-          <Link to="/" className="crumb">Home</Link>
+          <Link to="/" className="crumb">
+            Home
+          </Link>
           <span className="crumb-sep">/</span>
           <span className="crumb">Leaderboard</span>
         </div>
         <h1 className="h1">Italy Explorer Leaderboard</h1>
         <p className="muted">
-          Shared live board for departments. Submit after completing all 10 locations.
+          Shared live board for departments. Submit after completing all 10
+          locations.
         </p>
       </section>
 
       {!fbEnabled && (
         <Card
-          title="Leaderboard not configured (Firebase)"
-          sub="To enable the shared leaderboard, add Firebase env vars and deploy. Progress still works locally without it."
+          title="Leaderboard Unavailable"
+          sub="shared leaderboard -  Firebase. "
         >
-          <div className="hint warn">
-            Create a free Firebase project → enable Firestore + Anonymous Auth → fill .env → redeploy.
-          </div>
+          <div className="hint warn">Under development...</div>
         </Card>
       )}
 
@@ -133,7 +143,9 @@ export default function Leaderboard({ state, onToast }) {
             <div className="stat-label">Points</div>
           </div>
           <div className="stat">
-            <div className="stat-num">{state.submittedAchievement ? "✅" : allDone ? "⭐" : "—"}</div>
+            <div className="stat-num">
+              {state.submittedAchievement ? "✅" : allDone ? "⭐" : "—"}
+            </div>
             <div className="stat-label">Submitted</div>
           </div>
         </div>
@@ -145,15 +157,22 @@ export default function Leaderboard({ state, onToast }) {
         </div>
 
         {!profileOk && (
-          <div className="hint warn">Add your name + department on the home page to submit.</div>
+          <div className="hint warn">
+            Add your name + department on the home page to submit.
+          </div>
         )}
       </Card>
 
-      <Card title="Top Explorers" sub={loading ? "Loading…" : "Ranked by points"}>
+      <Card
+        title="Top Explorers"
+        sub={loading ? "Loading…" : "Ranked by points"}
+      >
         <div className="leader">
           {top3.map((r, i) => (
             <div key={r.id} className="leader-top">
-              <div className="medal">{i === 0 ? "🥇" : i === 1 ? "🥈" : "🥉"}</div>
+              <div className="medal">
+                {i === 0 ? "🥇" : i === 1 ? "🥈" : "🥉"}
+              </div>
               <div className="leader-name">
                 {r.firstName} <span className="muted">({r.department})</span>
               </div>
@@ -188,7 +207,8 @@ export default function Leaderboard({ state, onToast }) {
         </div>
 
         <div className="hint muted">
-          Ethics & Respect note: Win with integrity—help others join in and avoid blocking access to QR stations.
+          Ethics & Respect note: Win with integrity—help others join in and
+          avoid blocking access to QR stations.
         </div>
       </Card>
     </div>

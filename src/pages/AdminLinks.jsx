@@ -39,7 +39,7 @@ export default function AdminLinks() {
         </div>
 
         <div className="hint muted">
-          Pro tip: place QR codes at eye level next to props/signage. Add a big number matching the QR to build urgency.
+          Pro tip: Lorem, ipsum dolor sit amet consectetur adipisicing elit. Laborum, libero nam. Repellendus tempora autem suscipit hic consequatur quia praesentium nulla eveniet sit commodi perferendis pariatur, qui cupiditate? Culpa, fugit optio.
         </div>
       </Card>
     </div>
