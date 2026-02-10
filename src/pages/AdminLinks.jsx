@@ -20,6 +20,9 @@ export default function AdminLinks() {
       </section>
 
       <Card title="Location URLs" sub="Paste each URL into any QR generator.">
+        <div className="row" style={{ marginBottom: "10px" }}>
+          <Link to="/admin/panel" className="btn">Open Admin Panel</Link>
+        </div>
         <div className="table">
           <div className="trow thead">
             <div>#</div>

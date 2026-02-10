@@ -7,6 +7,7 @@ import LocationPage from "./pages/Location.jsx";
 import Certificate from "./pages/Certificate.jsx";
 import Leaderboard from "./pages/Leaderboard.jsx";
 import AdminLinks from "./pages/AdminLinks.jsx";
+import AdminPanel from "./pages/AdminPanel.jsx";
 import Toast from "./components/Toast.jsx";
 import { loadState, freshState, saveState } from "./utils/storage.js";
 
@@ -120,6 +121,10 @@ export default function App() {
                 element={<Leaderboard state={state} onToast={pushToast} />}
               />
               <Route path="/admin/links" element={<AdminLinks />} />
+              <Route
+                path="/admin/panel"
+                element={<AdminPanel state={state} setState={setState} onToast={pushToast} />}
+              />
               <Route path="*" element={<Navigate to="/" replace />} />
             </Routes>
           </motion.div>

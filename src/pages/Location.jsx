@@ -24,122 +24,183 @@ function YouTubeEmbed({ videoId, title }) {
 
 /** GAME 1: Quiz */
 function QuizGame({ locked, onSolved }) {
-  const stages = [
+  const rounds = [
     {
-      title: "Foundation Ring",
-      fact: "Roman builders started with a massive elliptical foundation to distribute weight evenly.",
-      correct: "Travertine stone foundation",
-      options: ["Travertine stone foundation", "Wooden scaffolding", "Clay roof tiles"],
-      visual: "Base"
+      code: "FND-01",
+      title: "Load Distribution",
+      brief: "Cracks appear along the lower ellipse. Choose the best stabilization layer.",
+      fact: "Roman engineers relied on travertine, tuff, and concrete systems to spread vertical and lateral load.",
+      correct: "Reinforce with a travertine perimeter ring",
+      options: [
+        "Suspend the structure from bronze cables",
+        "Reinforce with a travertine perimeter ring",
+        "Replace lower walls with timber braces",
+        "Use glass panels to reduce mass",
+      ],
     },
     {
-      title: "Outer Arches",
-      fact: "The exterior arcades used repeating arches to create strength and fast crowd flow.",
-      correct: "Three tiers of arches",
-      options: ["Three tiers of arches", "Glass curtain wall", "Single solid wall"],
-      visual: "Arches"
+      code: "ARC-02",
+      title: "Crowd Throughput",
+      brief: "You need faster ingress for a full event. Which design scales circulation safely?",
+      fact: "Stacked arcades and vomitoria moved spectators efficiently through the amphitheater.",
+      correct: "Expand radial corridors and vaulted arches",
+      options: [
+        "Expand radial corridors and vaulted arches",
+        "Reduce entrances to improve control",
+        "Convert access points into ramps only",
+        "Close upper tiers during entry",
+      ],
     },
     {
-      title: "Seating Tiers",
-      fact: "Seating was organized in levels, showing Roman engineering and social structure.",
-      correct: "Tiered stone seating",
-      options: ["Tiered stone seating", "Floating platforms", "Underground benches"],
-      visual: "Seating"
+      code: "ARE-03",
+      title: "Arena Operations",
+      brief: "Set transitions are too slow below stage level. Choose the authentic systems upgrade.",
+      fact: "The hypogeum used chambers, trapdoors, and lift mechanisms for rapid scene changes.",
+      correct: "Integrate hypogeum lift shafts and trapdoor routes",
+      options: [
+        "Flood the arena to move scenery by raft",
+        "Integrate hypogeum lift shafts and trapdoor routes",
+        "Move all prep space to rooftop platforms",
+        "Remove underfloor compartments entirely",
+      ],
     },
     {
-      title: "Arena Systems",
-      fact: "Below the arena, rooms and passages supported events with lifts and moving scenery.",
-      correct: "Underground chambers",
-      options: ["Underground chambers", "Waterfall tunnels", "Bronze mirrors"],
-      visual: "Arena"
+      code: "SEA-04",
+      title: "Spectator Zoning",
+      brief: "Sightlines are uneven. Pick the seating geometry that best fits the venue.",
+      fact: "Tiered cavea seating optimized viewing angles while managing social and traffic zones.",
+      correct: "Use tiered cavea sectors with dedicated access bands",
+      options: [
+        "Use flat concentric benches with no aisles",
+        "Use tiered cavea sectors with dedicated access bands",
+        "Place premium seating only at arena floor",
+        "Randomize rows to avoid crowd clustering",
+      ],
     },
     {
-      title: "Shade and Spectacle",
-      fact: "A retractable canopy called the velarium helped shield spectators from sun.",
-      correct: "Velarium canopy",
-      options: ["Velarium canopy", "Marble dome", "Iron skylight"],
-      visual: "Canopy"
+      code: "ENV-05",
+      title: "Heat Control",
+      brief: "Afternoon heat is reducing comfort. Select the historically accurate mitigation.",
+      fact: "The velarium was a retractable awning system stretched over the seating bowl.",
+      correct: "Deploy a retractable velarium canopy",
+      options: [
+        "Install a fixed marble dome roof",
+        "Deploy a retractable velarium canopy",
+        "Cover spectators with mirrored panels",
+        "Use oil torches for updraft cooling",
+      ],
     },
   ];
 
-  const [stageIdx, setStageIdx] = useState(0);
+  function shuffle(arr) {
+    const copy = [...arr];
+    for (let i = copy.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [copy[i], copy[j]] = [copy[j], copy[i]];
+    }
+    return copy;
+  }
+
+  const [roundIdx, setRoundIdx] = useState(0);
   const [mistakes, setMistakes] = useState(0);
-  const [feedback, setFeedback] = useState("");
+  const [integrity, setIntegrity] = useState(100);
+  const [streak, setStreak] = useState(0);
+  const [status, setStatus] = useState("");
+  const [choicesByRound, setChoicesByRound] = useState(() => rounds.map((r) => shuffle(r.options)));
   const startedAt = useRef(now());
   const solvedRef = useRef(false);
 
-  const doneCount = Math.min(stageIdx, stages.length);
-  const current = stageIdx < stages.length ? stages[stageIdx] : null;
+  const solvedCount = Math.min(roundIdx, rounds.length);
+  const activeRound = roundIdx < rounds.length ? rounds[roundIdx] : null;
+  const progressPct = Math.round((solvedCount / rounds.length) * 100);
 
   useEffect(() => {
     if (locked || solvedRef.current) return;
-    if (stageIdx >= stages.length) {
+    if (roundIdx >= rounds.length) {
       solvedRef.current = true;
       const seconds = Math.round((now() - startedAt.current) / 1000);
       onSolved({ seconds, mistakes });
     }
-  }, [stageIdx, locked, mistakes]); // eslint-disable-line
+  }, [roundIdx, locked, mistakes]); // eslint-disable-line
 
   function choose(option) {
-    if (locked || !current) return;
-    if (option === current.correct) {
-      setFeedback("Correct piece added.");
-      setStageIdx((i) => i + 1);
-    } else {
-      setMistakes((m) => m + 1);
-      setFeedback("Not quite. Try another piece.");
+    if (locked || !activeRound) return;
+    if (option === activeRound.correct) {
+      setStreak((s) => s + 1);
+      setStatus("Correct decision. Arena subsystem stabilized.");
+      setRoundIdx((i) => i + 1);
+      return;
     }
+
+    setMistakes((m) => m + 1);
+    setStreak(0);
+    setIntegrity((n) => Math.max(0, n - 14));
+    setStatus("Rejected. Structural model mismatch.");
   }
 
   function restart() {
     if (locked) return;
     startedAt.current = now();
     solvedRef.current = false;
-    setStageIdx(0);
+    setRoundIdx(0);
     setMistakes(0);
-    setFeedback("");
+    setIntegrity(100);
+    setStreak(0);
+    setStatus("");
+    setChoicesByRound(rounds.map((r) => shuffle(r.options)));
   }
 
   return (
     <div className="game">
-      <div className="game-title">Build the Colosseum</div>
+      <div className="game-title">Colosseum Command: Structural Audit</div>
       <p className="game-q">
-        Complete 5 construction stages. Pick the correct element each round to finish the Rome challenge.
+        Complete 5 real engineering calls to commission Rome&apos;s arena. Choices are randomized each round.
       </p>
 
-      <div className="hint muted">
-        Stage {Math.min(stageIdx + 1, stages.length)}/{stages.length} | Built: {doneCount}/5 | Misses: {mistakes}
+      <div className="rome-hud">
+        <div className="rome-hud-chip">Round {Math.min(roundIdx + 1, rounds.length)}/{rounds.length}</div>
+        <div className="rome-hud-chip">Integrity {integrity}%</div>
+        <div className="rome-hud-chip">Misses {mistakes}</div>
+        <div className="rome-hud-chip">Streak {streak}</div>
       </div>
 
-      <div className="colosseum-stack" aria-label="Colosseum build progress">
-        {stages.map((s, i) => (
-          <div key={s.title} className={`colosseum-layer ${i < doneCount ? "done" : ""}`}>
-            <span className="mono">{i < doneCount ? "[X]" : "[ ]"}</span>
-            <span>{s.visual}</span>
-          </div>
-        ))}
+      <div className="rome-arena">
+        <div
+          className="rome-ring"
+          style={{ "--rome-progress": `${progressPct}%` }}
+          aria-label={`Arena completion ${progressPct}%`}
+        />
+        <div className="rome-core">
+          <div className="rome-core-top">Audit Progress</div>
+          <div className="rome-core-main">{solvedCount}/5</div>
+        </div>
       </div>
 
-      {current ? (
-        <div className="colosseum-panel">
-          <div className="colosseum-stage">{current.title}</div>
-          <p className="game-q">{current.fact}</p>
-
-          <div className="choice-grid">
-            {current.options.map((option) => (
-              <button key={option} className="opt" onClick={() => choose(option)} disabled={locked}>
+      {activeRound ? (
+        <div className="rome-stage-card">
+          <div className="rome-stage-code">{activeRound.code}</div>
+          <div className="rome-stage-title">{activeRound.title}</div>
+          <p className="game-q">{activeRound.brief}</p>
+          <p className="hint muted">{activeRound.fact}</p>
+          <div className="rome-options">
+            {choicesByRound[roundIdx].map((option) => (
+              <button
+                key={option}
+                className="rome-opt"
+                onClick={() => choose(option)}
+                disabled={locked}
+              >
                 {option}
               </button>
             ))}
           </div>
         </div>
       ) : (
-        <div className="hint muted">Colosseum complete. Rome unlocked.</div>
+        <div className="hint muted">Audit complete. Rome unlocked.</div>
       )}
 
-      {!!feedback && !locked && <div className="hint muted">{feedback}</div>}
-
-      {!locked && <button className="ghost-btn" onClick={restart}>Restart Build</button>}
+      {!!status && !locked && <div className={`hint ${status.startsWith("Rejected") ? "warn" : "muted"}`}>{status}</div>}
+      {!locked && <button className="ghost-btn" onClick={restart}>Restart Audit</button>}
     </div>
   );
 }
