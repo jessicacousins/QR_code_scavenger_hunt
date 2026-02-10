@@ -5,36 +5,42 @@ import ProgressGrid from "../components/ProgressGrid.jsx";
 import Card from "../components/Card.jsx";
 import { DEPARTMENTS } from "../utils/departments.js";
 import { LOCATIONS } from "../data/locations.js";
+import romePhoto from "./rome.jpg";
+import florencePhoto from "./florence.jpg";
+import venicePhoto from "./venice.jpg";
+import milanPhoto from "./milian.jpg";
+import naplesPhoto from "./naples.jpg";
+import amalfiCoastPhoto from "./amalficoast.jpg";
 
 const CITY_SPOTLIGHTS = [
   {
     city: "Rome",
-    image: "https://source.unsplash.com/1600x900/?rome,colosseum,italy",
+    image: romePhoto,
     mapQuery: "Rome Italy",
   },
   {
     city: "Florence",
-    image: "https://source.unsplash.com/1600x900/?florence,duomo,italy",
+    image: florencePhoto,
     mapQuery: "Florence Italy",
   },
   {
     city: "Venice",
-    image: "https://source.unsplash.com/1600x900/?venice,canal,italy",
+    image: venicePhoto,
     mapQuery: "Venice Italy",
   },
   {
     city: "Milan",
-    image: "https://source.unsplash.com/1600x900/?milan,italy,city",
+    image: milanPhoto,
     mapQuery: "Milan Italy",
   },
   {
     city: "Naples",
-    image: "https://source.unsplash.com/1600x900/?naples,italy,coast",
+    image: naplesPhoto,
     mapQuery: "Naples Italy",
   },
   {
     city: "Amalfi Coast",
-    image: "https://source.unsplash.com/1600x900/?amalfi,coast,italy",
+    image: amalfiCoastPhoto,
     mapQuery: "Amalfi Coast Italy",
   },
 ];
