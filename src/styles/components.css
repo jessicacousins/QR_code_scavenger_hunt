@@ -925,6 +925,277 @@
 .gridcell.start { background: color-mix(in oklab, var(--accent) 16%, var(--bg2)); }
 .gridcell.end { background: color-mix(in oklab, var(--accent2) 14%, var(--bg2)); }
 
+.venice-route-card {
+  display: grid;
+  gap: 8px;
+  padding: 11px 12px;
+  border-radius: 14px;
+  border: 1px solid color-mix(in oklab, #1f6e9f 34%, var(--line));
+  background:
+    linear-gradient(130deg,
+      color-mix(in oklab, #5bb7e3 16%, var(--card2)),
+      color-mix(in oklab, #9fdaf1 16%, var(--card2)));
+}
+.venice-route-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.venice-route-title {
+  font-weight: 860;
+  color: color-mix(in oklab, #0f5e84 82%, var(--text));
+}
+.venice-route-toggle {
+  padding: 6px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+}
+.venice-route-copy {
+  margin: 0;
+  font-size: 13px;
+  color: color-mix(in oklab, #185978 76%, var(--text));
+}
+.venice-map-stage {
+  border-radius: 12px;
+  border: 1px solid color-mix(in oklab, #1f6e9f 30%, var(--line));
+  background: color-mix(in oklab, #e8f6fd 85%, var(--card));
+  padding: 8px;
+}
+.venice-map {
+  width: 100%;
+  display: block;
+}
+.venice-map-canal {
+  stroke: color-mix(in oklab, #6fb9de 70%, #fff);
+  stroke-width: 3.3;
+  stroke-linecap: round;
+  opacity: .85;
+}
+.venice-map-route {
+  fill: none;
+  stroke: #1284c0;
+  stroke-width: 4.8;
+  stroke-linejoin: round;
+  stroke-linecap: round;
+  stroke-dasharray: 2 0;
+  filter: drop-shadow(0 0 3px rgba(18, 132, 192, 0.35));
+}
+.venice-map-stop {
+  fill: #fff;
+  stroke: #126f9f;
+  stroke-width: 1.4;
+}
+.venice-map-step {
+  font-size: 3.2px;
+  font-weight: 900;
+  text-anchor: middle;
+  dominant-baseline: middle;
+  fill: #105d86;
+}
+
+.venice-instructions {
+  display: grid;
+  gap: 8px;
+  padding: 11px 12px;
+  border-radius: 14px;
+  border: 1px solid color-mix(in oklab, #1f6e9f 30%, var(--line));
+  background:
+    linear-gradient(120deg,
+      color-mix(in oklab, #3ea4d9 16%, var(--card2)),
+      color-mix(in oklab, #91d2ef 14%, var(--card2)));
+}
+.venice-instructions-title {
+  font-weight: 840;
+  color: color-mix(in oklab, #126389 78%, var(--text));
+}
+.venice-instructions-list {
+  display: grid;
+  gap: 4px;
+  color: color-mix(in oklab, #185978 76%, var(--text));
+  font-size: 13px;
+}
+
+.venice-grid-wrap {
+  position: relative;
+  border-radius: 18px;
+  border: 1px solid color-mix(in oklab, #1f6e9f 35%, var(--line));
+  overflow: hidden;
+  padding: 12px;
+  background:
+    linear-gradient(180deg,
+      color-mix(in oklab, #73c4ea 22%, var(--card2)),
+      color-mix(in oklab, #1f7db0 22%, var(--card2)));
+}
+.venice-grid-wrap.shake {
+  animation: veniceShake .26s ease-in-out;
+}
+.venice-grid-water {
+  position: absolute;
+  inset: 0;
+  opacity: 0.34;
+  pointer-events: none;
+  background:
+    radial-gradient(circle at 14% 24%, rgba(255, 255, 255, 0.45), transparent 38%),
+    radial-gradient(circle at 86% 74%, rgba(255, 255, 255, 0.35), transparent 34%),
+    repeating-linear-gradient(
+      140deg,
+      rgba(255, 255, 255, 0.2) 0 9px,
+      rgba(255, 255, 255, 0) 9px 18px
+    );
+}
+.venice-grid-route {
+  position: absolute;
+  inset: 12px;
+  z-index: 1;
+  pointer-events: none;
+}
+.venice-grid-canal {
+  stroke: rgba(214, 239, 251, 0.85);
+  stroke-width: 2.8;
+  stroke-linecap: round;
+}
+.venice-grid-main-route {
+  fill: none;
+  stroke: #0e7bb0;
+  stroke-width: 4.2;
+  stroke-linejoin: round;
+  stroke-linecap: round;
+  filter: drop-shadow(0 0 4px rgba(14, 123, 176, 0.35));
+}
+.venice-grid {
+  position: relative;
+  z-index: 2;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+}
+.venice-cell {
+  position: relative;
+  aspect-ratio: 1 / 1;
+  min-height: 74px;
+  border-radius: 16px;
+  border: 1px solid color-mix(in oklab, #1f6e9f 24%, var(--line));
+  background: color-mix(in oklab, #f4fbff 82%, var(--card));
+  cursor: pointer;
+  transition: transform .12s var(--ease), border-color .12s var(--ease), box-shadow .12s var(--ease);
+}
+.venice-cell:hover {
+  transform: translateY(-1px);
+  border-color: color-mix(in oklab, #1e79a8 45%, var(--line));
+}
+.venice-cell.route {
+  box-shadow: inset 0 0 0 2px rgba(18, 123, 176, 0.08);
+}
+.venice-cell.on {
+  border-color: color-mix(in oklab, #2b8bc0 55%, var(--line));
+  box-shadow: 0 8px 16px rgba(12, 82, 116, 0.2);
+  background: color-mix(in oklab, #cbeeff 55%, var(--card));
+}
+.venice-cell.start {
+  background: linear-gradient(140deg, rgba(37, 170, 106, 0.22), rgba(163, 231, 189, 0.2));
+}
+.venice-cell.end {
+  background: linear-gradient(140deg, rgba(209, 77, 77, 0.22), rgba(239, 170, 170, 0.2));
+}
+.venice-cell.next {
+  box-shadow: 0 0 0 2px color-mix(in oklab, #1c91c9 45%, transparent), 0 9px 20px rgba(14, 92, 132, 0.25);
+}
+.venice-cell-id {
+  position: absolute;
+  left: 8px;
+  top: 8px;
+  font-size: 11px;
+  font-weight: 860;
+  color: color-mix(in oklab, #1a688f 74%, var(--text));
+}
+.venice-flag {
+  position: absolute;
+  left: 8px;
+  bottom: 8px;
+  font-size: 10px;
+  font-weight: 840;
+  letter-spacing: 0.03em;
+  color: color-mix(in oklab, #125e83 78%, var(--text));
+}
+.venice-step {
+  position: absolute;
+  right: 8px;
+  bottom: 8px;
+  min-width: 21px;
+  height: 21px;
+  border-radius: 999px;
+  display: grid;
+  place-items: center;
+  font-size: 11px;
+  font-weight: 860;
+  color: #fff;
+  background: linear-gradient(135deg, #1b7cab, #28a3dc);
+  box-shadow: 0 5px 12px rgba(15, 97, 138, 0.36);
+}
+.venice-route-dot {
+  position: absolute;
+  inset: 50% auto auto 50%;
+  width: 10px;
+  height: 10px;
+  border-radius: 999px;
+  transform: translate(-50%, -50%);
+  background: rgba(17, 124, 179, 0.65);
+  box-shadow: 0 0 0 4px rgba(17, 124, 179, 0.16);
+}
+.venice-boat {
+  position: absolute;
+  inset: 50% auto auto 50%;
+  width: 28px;
+  height: 8px;
+  transform: translate(-50%, -50%);
+  border-radius: 10px;
+  background: linear-gradient(90deg, #155f84, #2aa5df);
+  box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.45);
+}
+.venice-boat::after {
+  content: "";
+  position: absolute;
+  right: -3px;
+  top: -6px;
+  width: 0;
+  height: 0;
+  border-left: 8px solid #f8f9fb;
+  border-top: 6px solid transparent;
+  border-bottom: 6px solid transparent;
+}
+.venice-progress {
+  display: grid;
+  gap: 8px;
+}
+.venice-progress-track {
+  height: 11px;
+  border-radius: 999px;
+  border: 1px solid color-mix(in oklab, #1f6e9f 28%, var(--line));
+  background: color-mix(in oklab, #d9eef8 74%, var(--card));
+  overflow: hidden;
+}
+.venice-progress-fill {
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, #1d83b6, #38b1e6);
+  box-shadow: 0 0 14px rgba(29, 131, 182, 0.35);
+  transition: width .18s var(--ease);
+}
+.venice-progress-meta {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+@keyframes veniceShake {
+  0% { transform: translateX(0); }
+  25% { transform: translateX(-4px); }
+  50% { transform: translateX(4px); }
+  75% { transform: translateX(-3px); }
+  100% { transform: translateX(0); }
+}
 .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
 .mem {
   height: 64px;
@@ -1202,3 +1473,7 @@
 .certText { color: var(--muted); line-height: 1.5; }
 .certPoints { margin-top: 10px; font-weight: 800; }
 .certBottom { display: flex; justify-content: space-between; gap: 12px; color: var(--muted); font-size: 12px; }
+
+
+
+

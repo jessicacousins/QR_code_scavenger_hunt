@@ -391,9 +391,37 @@ function WordScramble({ word, locked, onSolved }) {
 function PathTap({ locked, onSolved }) {
   // 3x3 grid; need to tap in order to "navigate"
   const path = [0, 1, 4, 7, 8];
+  const nodePos = {
+    0: { x: 18, y: 18 },
+    1: { x: 50, y: 18 },
+    2: { x: 82, y: 18 },
+    3: { x: 18, y: 50 },
+    4: { x: 50, y: 50 },
+    5: { x: 82, y: 50 },
+    6: { x: 18, y: 82 },
+    7: { x: 50, y: 82 },
+    8: { x: 82, y: 82 },
+  };
+  const canalSegments = [
+    [0, 1], [1, 2],
+    [0, 3], [1, 4], [2, 5],
+    [3, 4], [4, 5],
+    [3, 6], [4, 7], [5, 8],
+    [6, 7], [7, 8],
+  ];
+
   const [seq, setSeq] = useState([]);
   const [mistakes, setMistakes] = useState(0);
+  const [status, setStatus] = useState("Tap START, then follow the highlighted canal route to FINISH.");
+  const [shake, setShake] = useState(false);
+  const [showRoute, setShowRoute] = useState(true);
   const startedAt = useRef(now());
+  const shakeTimer = useRef(null);
+
+  const progressPct = Math.round((seq.length / path.length) * 100);
+  const nextTile = seq.length < path.length ? path[seq.length] : null;
+  const boatTile = seq.length ? seq[seq.length - 1] : path[0];
+  const routeLinePoints = path.map((tile) => `${nodePos[tile].x},${nodePos[tile].y}`).join(" ");
 
   function tap(i) {
     if (locked) return;
@@ -402,48 +430,150 @@ function PathTap({ locked, onSolved }) {
       const n = [...seq, i];
       setSeq(n);
       if (n.length === path.length) {
+        setStatus("Perfect route. You made it through the canals.");
         const seconds = Math.round((now() - startedAt.current) / 1000);
         onSolved({ seconds, mistakes });
+      } else {
+        const upcoming = path[n.length];
+        setStatus(`Nice move. Next canal stop: Tile ${upcoming + 1}.`);
       }
     } else {
       setMistakes((m) => m + 1);
       setSeq([]);
+      setStatus("Wrong turn. Route reset to START.");
+      setShake(true);
+      if (shakeTimer.current) clearTimeout(shakeTimer.current);
+      shakeTimer.current = setTimeout(() => setShake(false), 260);
     }
   }
+
+  function reset() {
+    setSeq([]);
+    setStatus("Route reset. Tap START to begin again.");
+  }
+
+  useEffect(() => {
+    return () => {
+      if (shakeTimer.current) clearTimeout(shakeTimer.current);
+    };
+  }, []);
 
   return (
     <div className="game">
       <div className="game-title">Canal Navigation</div>
       <p className="game-q">
-        Tap the tiles to guide your boat from start → finish. Wrong tile resets.
+        Venice uses canals like streets. Follow the highlighted water route from START to FINISH.
       </p>
-      <div className="grid3">
-        {Array.from({ length: 9 }).map((_, i) => {
-          const isIn = seq.includes(i);
-          const isStart = i === path[0];
-          const isEnd = i === path[path.length - 1];
-          return (
-            <button
-              key={i}
-              className={`gridcell ${isIn ? "on" : ""} ${isStart ? "start" : ""} ${isEnd ? "end" : ""}`}
-              onClick={() => tap(i)}
-              disabled={locked}
-              aria-label={`Tile ${i + 1}`}
-            >
-              {isStart ? "S" : isEnd ? "F" : ""}
-            </button>
-          );
-        })}
+
+      <div className="venice-route-card" aria-label="Canal route map">
+        <div className="venice-route-head">
+          <div className="venice-route-title">Canal Route Map</div>
+          <button
+            className="ghost-btn venice-route-toggle"
+            type="button"
+            disabled={locked}
+            onClick={() => setShowRoute((v) => !v)}
+          >
+            {showRoute ? "Hide Route" : "Show Route"}
+          </button>
+        </div>
+        <p className="venice-route-copy">
+          Water streets are highlighted in blue. Stay on the bright route to reach FINISH.
+        </p>
+        <div className="venice-map-stage">
+          <svg className="venice-map" viewBox="0 0 100 100" role="img" aria-label="Venice canal map and route">
+            {canalSegments.map(([a, b]) => (
+              <line
+                key={`${a}-${b}`}
+                className="venice-map-canal"
+                x1={nodePos[a].x}
+                y1={nodePos[a].y}
+                x2={nodePos[b].x}
+                y2={nodePos[b].y}
+              />
+            ))}
+            {showRoute && <polyline className="venice-map-route" points={routeLinePoints} />}
+            {path.map((tile, idx) => (
+              <g key={tile}>
+                <circle className="venice-map-stop" cx={nodePos[tile].x} cy={nodePos[tile].y} r="4.2" />
+                <text className="venice-map-step" x={nodePos[tile].x} y={nodePos[tile].y + 1.1}>{idx + 1}</text>
+              </g>
+            ))}
+          </svg>
+        </div>
       </div>
-      <div className="hint muted">Progress: {seq.length}/{path.length}</div>
+
+      <div className="venice-instructions" aria-label="Canal navigation instructions">
+        <div className="venice-instructions-title">How to play</div>
+        <div className="venice-instructions-list">
+          <span>1. Tap the START tile first.</span>
+          <span>2. Follow tiles in route order: 1, 2, 5, 8, 9.</span>
+          <span>3. Wrong tile resets to START.</span>
+        </div>
+      </div>
+
+      <div className={`venice-grid-wrap ${shake ? "shake" : ""}`}>
+        <div className="venice-grid-water" aria-hidden="true" />
+        {showRoute && (
+          <svg className="venice-grid-route" viewBox="0 0 100 100" aria-hidden="true">
+            {canalSegments.map(([a, b]) => (
+              <line
+                key={`grid-${a}-${b}`}
+                className="venice-grid-canal"
+                x1={nodePos[a].x}
+                y1={nodePos[a].y}
+                x2={nodePos[b].x}
+                y2={nodePos[b].y}
+              />
+            ))}
+            <polyline className="venice-grid-main-route" points={routeLinePoints} />
+          </svg>
+        )}
+        <div className="venice-grid">
+          {Array.from({ length: 9 }).map((_, i) => {
+            const isIn = seq.includes(i);
+            const stepNumber = seq.indexOf(i) + 1;
+            const isStart = i === path[0];
+            const isEnd = i === path[path.length - 1];
+            const isNext = !locked && nextTile === i;
+            const hasBoat = boatTile === i;
+            const isRouteTile = path.includes(i);
+            return (
+              <button
+                key={i}
+                className={`venice-cell ${isIn ? "on" : ""} ${isStart ? "start" : ""} ${isEnd ? "end" : ""} ${isNext ? "next" : ""} ${isRouteTile ? "route" : ""}`}
+                onClick={() => tap(i)}
+                disabled={locked}
+                aria-label={`Tile ${i + 1}`}
+              >
+                <span className="venice-cell-id">{i + 1}</span>
+                {isStart && <span className="venice-flag">START</span>}
+                {isEnd && <span className="venice-flag">FINISH</span>}
+                {isIn && <span className="venice-step">{stepNumber}</span>}
+                {showRoute && isRouteTile && !isIn && <span className="venice-route-dot" aria-hidden="true" />}
+                {hasBoat && <span className="venice-boat" aria-hidden="true" />}
+              </button>
+            );
+          })}
+        </div>
+      </div>
+
+      <div className="venice-progress" aria-label="Route progress">
+        <div className="venice-progress-track">
+          <div className="venice-progress-fill" style={{ width: `${progressPct}%` }} />
+        </div>
+        <div className="venice-progress-meta">
+          <span className="hint muted">Progress: {seq.length}/{path.length}</span>
+          {!locked && nextTile !== null && <span className="hint muted">Next: Tile {nextTile + 1}</span>}
+        </div>
+      </div>
+
+      {!locked && <div className={`hint ${status.startsWith("Wrong") ? "warn" : "muted"}`}>{status}</div>}
       {!locked && mistakes > 0 && <div className="hint warn">Resets: {mistakes}</div>}
-      <button className="btn" disabled={locked} onClick={() => setSeq([])}>
-        Reset
-      </button>
+      <button className="btn" disabled={locked} onClick={reset}>Reset Route</button>
     </div>
   );
 }
-
 /** GAME 4: Pattern Memory */
 function PatternMemory({ locked, onSolved }) {
   // show 4-step pattern on 2x2, then user repeats
@@ -1159,6 +1289,10 @@ export default function LocationPage({ state, setState, onToast }) {
     </div>
   );
 }
+
+
+
+
 
 
 
