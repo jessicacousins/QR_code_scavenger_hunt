@@ -576,72 +576,148 @@ function PathTap({ locked, onSolved }) {
 }
 /** GAME 4: Pattern Memory */
 function PatternMemory({ locked, onSolved }) {
-  // show 4-step pattern on 2x2, then user repeats
-  const buttons = ["A", "B", "C", "D"];
-  const [pattern] = useState(() => Array.from({ length: 4 }).map(() => Math.floor(Math.random() * 4)));
-  const [showing, setShowing] = useState(true);
-  const [idx, setIdx] = useState(0);
-  const [flash, setFlash] = useState(-1);
+  // Duomo Light Sprint: click the glowing window as it moves, 5 rounds to clear
+  const rounds = [4, 5, 6, 7, 8];
+  const [round, setRound] = useState(1);
+  const [hits, setHits] = useState(0);
+  const [target, setTarget] = useState(() => Math.floor(Math.random() * 9));
   const [mistakes, setMistakes] = useState(0);
+  const [betweenRounds, setBetweenRounds] = useState(false);
   const startedAt = useRef(now());
+  const nextRoundTimer = useRef(null);
+
+  function pickNext(prev) {
+    let n = Math.floor(Math.random() * 9);
+    while (n === prev) n = Math.floor(Math.random() * 9);
+    return n;
+  }
 
   useEffect(() => {
-    let cancelled = false;
-    async function run() {
-      for (let i = 0; i < pattern.length; i++) {
-        if (cancelled) return;
-        setFlash(pattern[i]);
-        await new Promise((r) => setTimeout(r, 360));
-        setFlash(-1);
-        await new Promise((r) => setTimeout(r, 140));
-      }
-      setShowing(false);
-    }
-    run();
-    return () => { cancelled = true; };
-  }, []); // eslint-disable-line
+    if (locked || betweenRounds) return undefined;
+    const paceMs = Math.max(320, 900 - round * 90);
+    const id = setInterval(() => {
+      setTarget((prev) => pickNext(prev));
+    }, paceMs);
+    return () => clearInterval(id);
+  }, [locked, betweenRounds, round]);
 
-  function press(i) {
-    if (locked || showing) return;
-    if (i === pattern[idx]) {
-      const n = idx + 1;
-      setIdx(n);
-      if (n === pattern.length) {
-        const seconds = Math.round((now() - startedAt.current) / 1000);
-        onSolved({ seconds, mistakes });
-      }
-    } else {
-      setMistakes((m) => m + 1);
-      setIdx(0);
+  useEffect(() => () => {
+    if (nextRoundTimer.current) clearTimeout(nextRoundTimer.current);
+  }, []);
+
+  function advanceRound() {
+    if (round >= rounds.length) {
+      const seconds = Math.round((now() - startedAt.current) / 1000);
+      onSolved({ seconds, mistakes });
+      return;
     }
+    setBetweenRounds(true);
+    nextRoundTimer.current = setTimeout(() => {
+      setRound((r) => r + 1);
+      setHits(0);
+      setTarget((prev) => pickNext(prev));
+      setBetweenRounds(false);
+    }, 700);
   }
+
+  function press(cell) {
+    if (locked || betweenRounds) return;
+    if (cell === target) {
+      setHits((h) => {
+        const n = h + 1;
+        if (n >= rounds[round - 1]) {
+          advanceRound();
+          return rounds[round - 1];
+        }
+        return n;
+      });
+      setTarget((prev) => pickNext(prev));
+      return;
+    }
+    setMistakes((m) => m + 1);
+  }
+
+  const palette = [
+    "linear-gradient(145deg, #6b7280, #4b5563)",
+    "linear-gradient(145deg, #0ea5e9, #0369a1)",
+    "linear-gradient(145deg, #22c55e, #15803d)",
+    "linear-gradient(145deg, #f97316, #c2410c)",
+    "linear-gradient(145deg, #eab308, #a16207)",
+    "linear-gradient(145deg, #a855f7, #7e22ce)",
+    "linear-gradient(145deg, #ef4444, #b91c1c)",
+    "linear-gradient(145deg, #14b8a6, #0f766e)",
+    "linear-gradient(145deg, #64748b, #334155)",
+  ];
 
   return (
     <div className="game">
-      <div className="game-title">Design Memory</div>
+      <div className="game-title">Duomo Light Sprint</div>
       <p className="game-q">
-        Watch the flashes, then repeat the pattern. Wrong press resets.
+        Tap the glowing window as it moves. Clear 5 rounds to unlock Milan.
       </p>
-      <div className="grid2">
-        {buttons.map((b, i) => (
-          <button
-            key={b}
-            className={`mem ${flash === i ? "flash" : ""}`}
-            onClick={() => press(i)}
-            disabled={locked || showing}
-          >
-            {b}
-          </button>
-        ))}
+      <div
+        style={{
+          display: "grid",
+          gridTemplateColumns: "repeat(3, minmax(64px, 1fr))",
+          gap: "10px",
+          maxWidth: "320px",
+          margin: "0 auto 12px",
+        }}
+      >
+        {Array.from({ length: 9 }).map((_, i) => {
+          const active = i === target && !betweenRounds;
+          return (
+            <button
+              key={i}
+              onClick={() => press(i)}
+              disabled={locked || betweenRounds}
+              style={{
+                aspectRatio: "1 / 1",
+                borderRadius: "14px",
+                border: active ? "2px solid #f8fafc" : "1px solid rgba(248,250,252,0.28)",
+                background: active ? palette[i] : "linear-gradient(145deg, #111827, #1f2937)",
+                boxShadow: active
+                  ? "0 0 0 2px rgba(248,250,252,0.25), 0 0 20px rgba(56,189,248,0.35)"
+                  : "inset 0 1px 0 rgba(248,250,252,0.04)",
+                transform: active ? "scale(1.03)" : "scale(1)",
+                transition: "all 120ms ease",
+                cursor: locked || betweenRounds ? "default" : "pointer",
+              }}
+              aria-label={`Window ${i + 1}`}
+            />
+          );
+        })}
+      </div>
+      <div style={{ maxWidth: "320px", margin: "0 auto 10px" }}>
+        <div
+          style={{
+            height: "8px",
+            borderRadius: "999px",
+            background: "rgba(255,255,255,0.16)",
+            overflow: "hidden",
+          }}
+        >
+          <div
+            style={{
+              height: "100%",
+              width: `${Math.round((hits / rounds[round - 1]) * 100)}%`,
+              background: "linear-gradient(90deg, #38bdf8, #22c55e)",
+              transition: "width 120ms ease",
+            }}
+          />
+        </div>
       </div>
       <div className="hint muted">
-        {locked ? "Completed" : showing ? "Watching…" : `Your turn: ${idx}/4`}
+        {locked
+          ? "Completed"
+          : betweenRounds
+            ? `Round ${round} complete. Next round...`
+            : `Round ${round}/5  Hits: ${hits}/${rounds[round - 1]}`}
       </div>
-      {!locked && mistakes > 0 && <div className="hint warn">Resets: {mistakes}</div>}
+      {!locked && mistakes > 0 && <div className="hint warn">Misses: {mistakes}</div>}
     </div>
   );
 }
-
 /** GAME 5: Drag Build (Pizza) */
 function DragBuild({ locked, onSolved }) {
   const steps = ["Dough", "Tomato", "Mozzarella", "Basil"];
