@@ -720,8 +720,21 @@ function PatternMemory({ locked, onSolved }) {
 }
 /** GAME 5: Drag Build (Pizza) */
 function DragBuild({ locked, onSolved }) {
-  const steps = ["Dough", "Tomato", "Mozzarella", "Basil"];
-  const [pool, setPool] = useState(() => shuffle(steps));
+  const steps = [
+    { key: "List", label: "Create ingredient list", stage: "plan" },
+    { key: "Budget", label: "Set budget", stage: "plan" },
+    { key: "Shop", label: "Shop for ingredients", stage: "plan" },
+    { key: "Prep", label: "Prep station", stage: "prep" },
+    { key: "Dough", label: "Stretch dough", stage: "pizza" },
+    { key: "Tomato", label: "Spread tomato sauce", stage: "pizza" },
+    { key: "Mozzarella", label: "Add mozzarella", stage: "pizza" },
+    { key: "Basil", label: "Finish with basil", stage: "pizza" },
+    { key: "Preheat", label: "Preheat oven", stage: "oven" },
+    { key: "Bake", label: "Cook pizza", stage: "oven" },
+    { key: "Serve", label: "Ready to serve", stage: "finish" },
+  ];
+
+  const [pool, setPool] = useState(() => shuffle(steps.map((s) => s.key)));
   const [built, setBuilt] = useState([]);
   const [mistakes, setMistakes] = useState(0);
   const startedAt = useRef(now());
@@ -737,7 +750,7 @@ function DragBuild({ locked, onSolved }) {
 
   function add(item) {
     if (locked) return;
-    const want = steps[built.length];
+    const want = steps[built.length]?.key;
     if (item === want) {
       setBuilt((b) => [...b, item]);
       setPool((p) => p.filter((x) => x !== item));
@@ -745,49 +758,311 @@ function DragBuild({ locked, onSolved }) {
         const seconds = Math.round((now() - startedAt.current) / 1000);
         onSolved({ seconds, mistakes });
       }
-    } else {
-      setMistakes((m) => m + 1);
+      return;
     }
+    setMistakes((m) => m + 1);
   }
 
   function reset() {
     if (locked) return;
-    setPool(shuffle(steps));
+    setPool(shuffle(steps.map((s) => s.key)));
     setBuilt([]);
     setMistakes(0);
   }
 
+  function done(key) {
+    return built.includes(key);
+  }
+
+  const nextStep = steps[built.length];
+  const progress = Math.round((built.length / steps.length) * 100);
+
+  const mozzarellaSpots = [
+    { top: "21%", left: "33%", w: "18%", h: "14%", rot: "8deg" },
+    { top: "33%", left: "18%", w: "19%", h: "14%", rot: "-10deg" },
+    { top: "30%", left: "54%", w: "17%", h: "12%", rot: "15deg" },
+    { top: "49%", left: "29%", w: "19%", h: "14%", rot: "-14deg" },
+    { top: "54%", left: "50%", w: "18%", h: "13%", rot: "10deg" },
+    { top: "43%", left: "42%", w: "16%", h: "12%", rot: "4deg" },
+  ];
+
+  const basilLeaves = [
+    { top: "21%", left: "46%", rot: "8deg" },
+    { top: "39%", left: "29%", rot: "-14deg" },
+    { top: "39%", left: "58%", rot: "16deg" },
+    { top: "58%", left: "40%", rot: "-4deg" },
+    { top: "63%", left: "54%", rot: "18deg" },
+  ];
+
   return (
     <div className="game">
-      <div className="game-title">Build the Classic</div>
-      <p className="game-q">Tap the ingredients in the right order.</p>
+      <div className="game-title">Neapolitan Pizza Studio</div>
+      <p className="game-q">Complete each production step in order to deliver a perfect Margherita.</p>
 
-      <div className="dragzone">
-        <div className="stackline">
-          {steps.map((s, i) => (
-            <div key={s} className={`slot ${built[i] ? "filled" : ""}`}>
-              {built[i] ? built[i] : i === built.length ? "Next…" : "—"}
-            </div>
-          ))}
+      <div
+        style={{
+          margin: "0 auto 14px",
+          maxWidth: "390px",
+          padding: "12px",
+          borderRadius: "18px",
+          border: "1px solid rgba(248,250,252,0.18)",
+          background: "linear-gradient(170deg, rgba(12,20,30,0.62), rgba(28,14,10,0.58))",
+        }}
+      >
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns: "1fr auto",
+            alignItems: "center",
+            gap: "8px",
+            marginBottom: "10px",
+          }}
+        >
+          <div className="hint muted" style={{ textAlign: "left" }}>
+            {locked ? "Order complete" : `Current step: ${nextStep?.label || "Complete"}`}
+          </div>
+          <div className="hint muted">{built.length}/{steps.length}</div>
+        </div>
+        <div
+          style={{
+            height: "8px",
+            borderRadius: "999px",
+            background: "rgba(248,250,252,0.14)",
+            overflow: "hidden",
+            marginBottom: "12px",
+          }}
+        >
+          <div
+            style={{
+              width: `${progress}%`,
+              height: "100%",
+              background: "linear-gradient(90deg, #f59e0b, #22c55e)",
+              transition: "width 220ms ease",
+            }}
+          />
         </div>
 
-        <div className="ingredients">
-          {pool.map((p) => (
-            <button key={p} className="chipbtn" disabled={locked} onClick={() => add(p)}>
-              {p}
-            </button>
-          ))}
+        <div
+          style={{
+            position: "relative",
+            margin: "0 auto",
+            width: "100%",
+            maxWidth: "320px",
+            aspectRatio: "1 / 1",
+          }}
+        >
+          <div
+            style={{
+              position: "absolute",
+              inset: 0,
+              borderRadius: "22px",
+              background: done("Prep")
+                ? "linear-gradient(160deg, #9a6a3b 0%, #6d4624 65%, #4f3219 100%)"
+                : "linear-gradient(160deg, #283445 0%, #1a2230 100%)",
+              boxShadow: "inset 0 14px 28px rgba(255,255,255,0.06), 0 8px 20px rgba(0,0,0,0.35)",
+            }}
+          />
+
+          {done("Prep") && (
+            <div
+              style={{
+                position: "absolute",
+                inset: "6%",
+                borderRadius: "18px",
+                background:
+                  "radial-gradient(circle at 25% 30%, rgba(255,255,255,0.24), rgba(255,255,255,0) 45%), radial-gradient(circle at 70% 65%, rgba(255,255,255,0.15), rgba(255,255,255,0) 42%)",
+              }}
+            />
+          )}
+
+          <div
+            style={{
+              position: "absolute",
+              inset: "9%",
+              borderRadius: "999px",
+              background: "radial-gradient(circle at 50% 46%, #2b3445 0%, #111827 72%)",
+              boxShadow: "inset 0 10px 22px rgba(255,255,255,0.05), 0 8px 22px rgba(0,0,0,0.42)",
+              overflow: "hidden",
+            }}
+          >
+            {done("Dough") && (
+              <div
+                style={{
+                  position: "absolute",
+                  inset: "8%",
+                  borderRadius: "999px",
+                  background: "radial-gradient(circle at 35% 28%, #ffe3a7 0%, #f4b76d 58%, #b65c1f 100%)",
+                  boxShadow: "inset 0 8px 18px rgba(255,250,220,0.35), inset 0 -16px 20px rgba(117,54,18,0.35)",
+                }}
+              />
+            )}
+
+            {done("Tomato") && (
+              <div
+                style={{
+                  position: "absolute",
+                  inset: "15%",
+                  borderRadius: "999px",
+                  background:
+                    "radial-gradient(circle at 30% 32%, #ff846a 0%, #df3f2c 46%, #a61f13 100%)",
+                  boxShadow: "inset 0 10px 16px rgba(255,180,160,0.24)",
+                }}
+              />
+            )}
+
+            {done("Mozzarella") && mozzarellaSpots.map((s, i) => (
+              <div
+                key={`moz-${i}`}
+                style={{
+                  position: "absolute",
+                  top: s.top,
+                  left: s.left,
+                  width: s.w,
+                  height: s.h,
+                  transform: `rotate(${s.rot})`,
+                  borderRadius: "999px",
+                  background: "radial-gradient(circle at 35% 30%, #fffdfa 0%, #f4f1eb 70%, #ded7ca 100%)",
+                  boxShadow: "0 3px 8px rgba(0,0,0,0.2), inset 0 2px 4px rgba(255,255,255,0.7)",
+                }}
+              />
+            ))}
+
+            {done("Basil") && basilLeaves.map((b, i) => (
+              <div
+                key={`basil-${i}`}
+                style={{
+                  position: "absolute",
+                  top: b.top,
+                  left: b.left,
+                  width: "11%",
+                  height: "8%",
+                  transform: `rotate(${b.rot})`,
+                  borderRadius: "60% 40% 60% 40%",
+                  background: "linear-gradient(155deg, #2dd36f 0%, #157f3d 100%)",
+                  boxShadow: "0 2px 6px rgba(0,0,0,0.25)",
+                }}
+              />
+            ))}
+
+            {done("Bake") && (
+              <div
+                style={{
+                  position: "absolute",
+                  inset: "8%",
+                  borderRadius: "999px",
+                  background:
+                    "radial-gradient(circle at 50% 50%, rgba(255,210,120,0.1) 0%, rgba(60,25,10,0.22) 70%), radial-gradient(circle at 70% 35%, rgba(40,20,10,0.28) 0%, rgba(0,0,0,0) 34%)",
+                  mixBlendMode: "multiply",
+                }}
+              />
+            )}
+          </div>
+
+          <div
+            style={{
+              position: "absolute",
+              right: "-4px",
+              top: "10px",
+              width: "102px",
+              padding: "8px",
+              borderRadius: "12px",
+              border: "1px solid rgba(248,250,252,0.14)",
+              background: "rgba(2,6,23,0.58)",
+            }}
+          >
+            <div className="hint muted" style={{ fontSize: "11px" }}>Oven</div>
+            <div
+              style={{
+                marginTop: "4px",
+                height: "8px",
+                borderRadius: "999px",
+                background: "rgba(248,250,252,0.16)",
+                overflow: "hidden",
+              }}
+            >
+              <div
+                style={{
+                  width: done("Bake") ? "100%" : done("Preheat") ? "58%" : "8%",
+                  height: "100%",
+                  background: done("Bake")
+                    ? "linear-gradient(90deg, #fb923c, #ef4444)"
+                    : "linear-gradient(90deg, #60a5fa, #f59e0b)",
+                  transition: "width 250ms ease",
+                }}
+              />
+            </div>
+            <div className="hint muted" style={{ fontSize: "11px", marginTop: "4px" }}>
+              {done("Bake") ? "Cooked" : done("Preheat") ? "Preheated" : "Cold"}
+            </div>
+          </div>
         </div>
       </div>
 
-      <div className="row">
+      <div
+        style={{
+          marginBottom: "10px",
+          display: "grid",
+          gap: "8px",
+        }}
+      >
+        {built.length === 0 && <div className="hint muted">Completed steps will appear here.</div>}
+        {built.map((k, i) => {
+          const info = steps.find((s) => s.key === k);
+          return (
+            <div
+              key={`${k}-${i}`}
+              style={{
+                padding: "8px 10px",
+                borderRadius: "10px",
+                border: "1px solid rgba(34,197,94,0.35)",
+                background: "linear-gradient(180deg, rgba(34,197,94,0.14), rgba(22,101,52,0.16))",
+                textAlign: "left",
+                fontSize: "13px",
+              }}
+            >
+              Step {i + 1}: {info?.label || k}
+            </div>
+          );
+        })}
+      </div>
+
+      <div
+        className="ingredients"
+        style={{
+          display: "grid",
+          gridTemplateColumns: "repeat(2, minmax(0, 1fr))",
+          gap: "10px",
+          marginBottom: "10px",
+        }}
+      >
+        {pool.map((p) => {
+          const info = steps.find((s) => s.key === p);
+          const isNext = p === nextStep?.key;
+          return (
+            <button
+              key={p}
+              className="chipbtn"
+              disabled={locked}
+              onClick={() => add(p)}
+              style={{
+                minHeight: "44px",
+                border: isNext ? "1px solid rgba(250,204,21,0.95)" : undefined,
+                boxShadow: isNext ? "0 0 0 2px rgba(250,204,21,0.25)" : undefined,
+              }}
+            >
+              {info?.label || p}
+            </button>
+          );
+        })}
+      </div>
+
+      <div className="row" style={{ alignItems: "center", gap: "10px" }}>
         <button className="ghost-btn" onClick={reset} disabled={locked}>Reset</button>
         {!locked && mistakes > 0 && <div className="hint warn">Mistakes: {mistakes}</div>}
       </div>
     </div>
   );
 }
-
 /** GAME 6: Ingredient match (pairing) */
 function IngredientMatch({ locked, onSolved }) {
   const pairs = [
