@@ -737,6 +737,7 @@ function DragBuild({ locked, onSolved }) {
   const [pool, setPool] = useState(() => shuffle(steps.map((s) => s.key)));
   const [built, setBuilt] = useState([]);
   const [mistakes, setMistakes] = useState(0);
+  const [feedback, setFeedback] = useState("");
   const startedAt = useRef(now());
 
   function shuffle(arr) {
@@ -754,6 +755,7 @@ function DragBuild({ locked, onSolved }) {
     if (item === want) {
       setBuilt((b) => [...b, item]);
       setPool((p) => p.filter((x) => x !== item));
+      setFeedback(`Correct: ${steps[built.length]?.label}`);
       if (built.length + 1 === steps.length) {
         const seconds = Math.round((now() - startedAt.current) / 1000);
         onSolved({ seconds, mistakes });
@@ -761,6 +763,7 @@ function DragBuild({ locked, onSolved }) {
       return;
     }
     setMistakes((m) => m + 1);
+    setFeedback("Incorrect step. Try again.");
   }
 
   function reset() {
@@ -768,6 +771,7 @@ function DragBuild({ locked, onSolved }) {
     setPool(shuffle(steps.map((s) => s.key)));
     setBuilt([]);
     setMistakes(0);
+    setFeedback("");
   }
 
   function done(key) {
@@ -1037,7 +1041,6 @@ function DragBuild({ locked, onSolved }) {
       >
         {pool.map((p) => {
           const info = steps.find((s) => s.key === p);
-          const isNext = p === nextStep?.key;
           return (
             <button
               key={p}
@@ -1046,8 +1049,6 @@ function DragBuild({ locked, onSolved }) {
               onClick={() => add(p)}
               style={{
                 minHeight: "44px",
-                border: isNext ? "1px solid rgba(250,204,21,0.95)" : undefined,
-                boxShadow: isNext ? "0 0 0 2px rgba(250,204,21,0.25)" : undefined,
               }}
             >
               {info?.label || p}
@@ -1058,6 +1059,14 @@ function DragBuild({ locked, onSolved }) {
 
       <div className="row" style={{ alignItems: "center", gap: "10px" }}>
         <button className="ghost-btn" onClick={reset} disabled={locked}>Reset</button>
+        {!locked && feedback && (
+          <div
+            className={`hint ${feedback.startsWith("Correct:") ? "ok" : "warn"}`}
+            style={{ flex: 1, textAlign: "left" }}
+          >
+            {feedback}
+          </div>
+        )}
         {!locked && mistakes > 0 && <div className="hint warn">Mistakes: {mistakes}</div>}
       </div>
     </div>
