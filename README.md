@@ -1,73 +1,32 @@
-# Italy QR Quest (10 QR Scavenger Hunt) — Vite + React + CSS
+# Italy QR Quest
 
-Mobile-first QR scavenger hunt for a live event:
-- 10 Italy locations
-- Progress tracker (1–10)
-- One mini-game per location (scored once)
-- Italy Explorer certificate
-- Shared leaderboard (Firebase free tier)
+Italy QR Quest is a mobile-first QR scavenger hunt web app built for live events.
 
-## 1) Install + run locally
-```bash
-npm install
-npm run dev
-```
+## Features
 
-## 2) Build for production
-```bash
-npm run build
-npm run preview
-```
+- 10 location checkpoints
+- One mini-game per location
+- Progress tracking
+- Certificate unlock on full completion
+- Shared leaderboard (Firebase)
 
-Deploy to Netlify/Vercel/GitHub Pages.
+## Tech Stack
 
-## 3) Leaderboard (Firebase free tier)
-This app supports a shared leaderboard via Firebase:
-- **Anonymous Auth** (device identity)
-- **Firestore** collection: `italyQuestLeaderboard`
+- Vite
+- React
+- React Router
+- CSS
+- Firebase
 
-### Firebase setup steps
-1. Create a Firebase project
-2. Build → Authentication → Sign-in method → enable **Anonymous**
-3. Build → Firestore Database → create database (production mode is fine if you add rules below)
-4. Copy Firebase web config into `.env` (see `.env.example`)
-5. Redeploy
+## License And Use Agreement
 
-### Recommended Firestore Security Rules
-These rules allow:
-- write **only** to your own UID doc
-- read for everyone (leaderboard)
-- prevents overwriting someone else
+This project is proprietary software. All rights are reserved.
 
-```js
-rules_version = '2';
-service cloud.firestore {
-  match /databases/{database}/documents {
-    match /italyQuestLeaderboard/{userId} {
-      allow read: if true;
-      allow create: if request.auth != null && request.auth.uid == userId;
-      allow update, delete: if false;
-    }
-  }
-}
-```
+By accessing, copying, or using any part of this codebase, you agree to the following:
 
-## 4) QR codes
-After deploy, generate QR codes that link to:
-- `/loc/1` … `/loc/10`
+1. No permission is granted to copy, redistribute, publish, sublicense, or sell this software or derivative works.
+2. No permission is granted to use this software for commercial or internal organizational use without prior written authorization from the copyright owner.
+3. Reverse engineering, code extraction, and reuse of core implementation patterns for competing products are prohibited.
+4. Any unauthorized use is a material violation of this agreement and may result in legal action.
 
-Open:
-- `/admin/links` to see the full URL list on your deployed domain.
-
-## 5) Fairness note (real-world)
-No $0 web-only system can perfectly stop cheating (people can clear app data).
-This build prevents **re-scoring** using:
-- local storage lock
-- Firebase UID doc lock (anonymous auth)
-
-It’s practical for live events and department competitions.
-
-## 6) Customization
-- Edit locations: `src/data/locations.js`
-- Departments: `src/utils/departments.js`
-- Colors/themes: `src/styles/theme.css`
+For licensing inquiries, contact the project owner before any use outside authorized development or operation contexts.
